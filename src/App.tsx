@@ -84,7 +84,7 @@ const App = observer(() => {
   }, []);
 
   return (
-    <div>
+    <div test-id="App">
       <div className="row">
         <select value={selectedNetworkId} onChange={handleSelectedNetworkChange}>
           {Object.values(networks).map(({ id, fullName }) => (
