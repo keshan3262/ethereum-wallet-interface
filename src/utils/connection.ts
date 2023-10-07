@@ -30,12 +30,12 @@ const addNetwork = async (networkId: number) => {
     throw new EthereumNotFoundError();
   }
 
-  const networkToAdd = networks[networkId];
+  const { knownTokens, ...networkProps } = networks[networkId];
 
-  if (networkToAdd) {
+  if (networkProps) {
     await ethereum.request({
       method: 'wallet_addEthereumChain',
-      params: [networkToAdd]
+      params: [networkProps]
     });
   } else {
     throw new Error(`Network with id ${networkId} is not supported`);
