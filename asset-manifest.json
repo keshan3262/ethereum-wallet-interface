@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/ethereum-wallet-interface/static/css/main.1761766b.css",
-    "main.js": "/ethereum-wallet-interface/static/js/main.8d1cba3d.js",
+    "main.css": "/ethereum-wallet-interface/static/css/main.2e1783e1.css",
+    "main.js": "/ethereum-wallet-interface/static/js/main.90a7ef54.js",
     "static/js/787.0b075a87.chunk.js": "/ethereum-wallet-interface/static/js/787.0b075a87.chunk.js",
     "index.html": "/ethereum-wallet-interface/index.html",
-    "main.1761766b.css.map": "/ethereum-wallet-interface/static/css/main.1761766b.css.map",
-    "main.8d1cba3d.js.map": "/ethereum-wallet-interface/static/js/main.8d1cba3d.js.map",
+    "main.2e1783e1.css.map": "/ethereum-wallet-interface/static/css/main.2e1783e1.css.map",
+    "main.90a7ef54.js.map": "/ethereum-wallet-interface/static/js/main.90a7ef54.js.map",
     "787.0b075a87.chunk.js.map": "/ethereum-wallet-interface/static/js/787.0b075a87.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.1761766b.css",
-    "static/js/main.8d1cba3d.js"
+    "static/css/main.2e1783e1.css",
+    "static/js/main.90a7ef54.js"
   ]
 }
