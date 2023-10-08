@@ -7,16 +7,10 @@ import {
 } from './error';
 import { networks } from './networks';
 import { withoutConcurrentCall } from './without-concurrent-call';
+import { Connection } from '../types/connection';
 
 interface MaybeMetamaskProvider extends ethers.Eip1193Provider, Pick<Provider, 'on' | 'off'> {
   isMetaMask?: boolean;
-}
-
-export interface Connection {
-  signer: ethers.JsonRpcSigner;
-  provider: BrowserProvider;
-  networkId: number;
-  address: string;
 }
 
 export const getEthereum = () => window.ethereum ? window.ethereum as MaybeMetamaskProvider : undefined;

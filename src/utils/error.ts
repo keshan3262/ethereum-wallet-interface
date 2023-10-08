@@ -43,8 +43,6 @@ export const transformError = (error: unknown) => {
 }
 
 export const getErrorMessage = (error: unknown) => {
-  console.error(error);
-
   if (isErrorWithCode(error)) {
     return `Provider error: ${error.message} (code ${error.code})`;
   }
