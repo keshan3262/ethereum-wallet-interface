@@ -1,5 +1,4 @@
 export const UNKNOWN_CHAIN_ERROR_CODE = 4902;
-export const ALREADY_PENDING_ERROR_CODE = -32002;
 export const USER_REJECTED_ERROR_CODE = 4001;
 
 interface ErrorWithCode extends Error {
@@ -20,14 +19,6 @@ export class EthereumNotFoundError extends Error {
   }
 }
 
-export class AlreadyPendingError extends Error {
-  code = ALREADY_PENDING_ERROR_CODE;
-
-  constructor(message = 'Already pending') {
-    super(message);
-  }
-}
-
 export class UserRejectedError extends Error {
   code = USER_REJECTED_ERROR_CODE;
 
@@ -43,8 +34,6 @@ export const transformError = (error: unknown) => {
     switch (error.code) {
       case UNKNOWN_CHAIN_ERROR_CODE:
         return new UnknownChainErrorCode();
-      case ALREADY_PENDING_ERROR_CODE:
-        return new AlreadyPendingError();
       case USER_REJECTED_ERROR_CODE:
         return new UserRejectedError();
     }

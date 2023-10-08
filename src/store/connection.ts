@@ -47,15 +47,6 @@ class ConnectionStore {
     this.setConnection({ ...this.connection, signer, address });
   }
 
-  async refreshChainId() {
-    if (!this.connection) {
-      return;
-    }
-
-    const network = await this.connection.provider.getNetwork();
-    this.setConnection({ ...this.connection, networkId: Number(network.chainId) });
-  }
-
   setConnection(connection: Connection | undefined) {
     this.connection = connection;
   }

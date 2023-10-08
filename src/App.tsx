@@ -9,7 +9,7 @@ import { EthereumNotFoundError, getErrorMessage } from './utils/error';
 const App = observer(() => {
   const connection = connectionStore.connection;
   const [selectedNetworkId, setSelectedNetworkId] = useState(1);
-  const canConnect = metamaskIsAvailable();
+  const [canConnect, setCanConnect] = useState(metamaskIsAvailable());
 
   const handleSelectedNetworkChange = useCallback(async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newNetworkId = Number(e.target.value);
@@ -53,13 +53,7 @@ const App = observer(() => {
       }
     };
 
-    const handleChainChanged = async () => {
-      try {
-        await connectionStore.refreshChainId();
-      } catch (e) {
-        alert(getErrorMessage(e));
-      }
-    };
+    const handleChainChanged = () => window.location.reload();
 
     ethereum.on('accountsChanged', handleAccountsChanged);
     ethereum.on('chainChanged', handleChainChanged);
@@ -81,6 +75,10 @@ const App = observer(() => {
 
         alert(getErrorMessage(e));
       });
+    
+    const timeout = setTimeout(() => setCanConnect(metamaskIsAvailable()), 1000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   return (

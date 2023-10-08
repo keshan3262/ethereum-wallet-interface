@@ -6,6 +6,7 @@ import {
   transformError
 } from './error';
 import { networks } from './networks';
+import { withoutConcurrentCall } from './without-concurrent-call';
 
 interface MaybeMetamaskProvider extends ethers.Eip1193Provider, Pick<Provider, 'on' | 'off'> {
   isMetaMask?: boolean;
@@ -23,7 +24,7 @@ export const getEthereum = () => window.ethereum ? window.ethereum as MaybeMetam
 export const ethereumIsAvailable = () => Boolean(getEthereum());
 export const metamaskIsAvailable = () => getEthereum()?.isMetaMask ?? false;
 
-const addNetwork = async (networkId: number) => {
+const addNetwork = withoutConcurrentCall(async (networkId: number) => {
   const ethereum = getEthereum();
 
   if (!ethereum) {
@@ -40,9 +41,10 @@ const addNetwork = async (networkId: number) => {
   } else {
     throw new Error(`Network with id ${networkId} is not supported`);
   }
-};
+});
 
-export const switchChain = async (networkId: number): Promise<void> => {
+export const switchChain = withoutConcurrentCall(async (networkId: number): Promise<void> => {
+  console.log('switchChain', Date.now());
   const ethereum = getEthereum();
 
   if (!ethereum) {
@@ -64,9 +66,9 @@ export const switchChain = async (networkId: number): Promise<void> => {
 
     throw transformError(e);
   }
-};
+});
 
-export const getConnection = async (networkId?: number): Promise<Connection> => {
+export const getConnection = withoutConcurrentCall(async (networkId?: number): Promise<Connection> => {
   const ethereum = getEthereum();
 
   if (!ethereum) {
@@ -95,6 +97,6 @@ export const getConnection = async (networkId?: number): Promise<Connection> => 
       return getConnection(networkId);
     }
 
-    throw e;
+    throw transformError(e);
   }
-};
+});
