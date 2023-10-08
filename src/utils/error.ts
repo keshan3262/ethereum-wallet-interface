@@ -33,6 +33,7 @@ export class UserRejectedError extends TrueErrorWithCode {
 
 export const isErrorWithCode = (error: unknown): error is ErrorWithCode => (error as any).code !== undefined;
 
+/** Converts Metamask errors into `Error` class instances, other errors are not changed */
 export const transformError = (error: unknown) => {
   if (isErrorWithCode(error)) {
     switch (error.code) {

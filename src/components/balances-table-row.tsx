@@ -7,15 +7,19 @@ import { TokenDescriptor, TokenMetadata, TokenType } from '../types/tokens';
 import './balances-table-row.css';
 
 interface BalancesTableRowProps {
-  value?: FetchState<bigint>;
-  tokenMetadata?: FetchState<TokenMetadata>;
+  valueState?: FetchState<bigint>;
+  tokenMetadataState?: FetchState<TokenMetadata>;
   token: TokenDescriptor;
 }
 
 const loadingValue: FetchState<bigint> = { isLoading: true };
 const loadingTokenMetadata: FetchState<TokenMetadata> = { isLoading: true };
 
-export const BalancesTableRow = memo(({ value = loadingValue, tokenMetadata = loadingTokenMetadata, token }: BalancesTableRowProps) => {
+export const BalancesTableRow = memo(({
+  valueState: value = loadingValue,
+  tokenMetadataState: tokenMetadata = loadingTokenMetadata,
+  token
+}: BalancesTableRowProps) => {
   const fallbackTokenName = token.type === TokenType.Native ? 'native token' : `token ${token.address}`;
 
   if (tokenMetadata.error) {

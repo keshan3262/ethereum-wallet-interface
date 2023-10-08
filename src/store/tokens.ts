@@ -34,51 +34,6 @@ class TokensStore {
     });
   }
 
-  async getFreshEntityEntry<T>(
-    fetchFn: (connection: Connection, token: TokenDescriptor) => Promise<T>,
-    token: TokenDescriptor
-  ): Promise<[string, FetchState<T>]> {
-    const tokenSlug = getTokenSlug(token);
-    const connection = connectionStore.connection;
-
-    if (connection) {
-      try {
-        const data = await fetchFn(connection, token);
-
-        return [tokenSlug, { isLoading: false, data }];
-      } catch (e) {
-        console.error(e);
-
-        return [tokenSlug, { isLoading: false, error: e instanceof Error ? e : new Error('Unknown error') }];
-      }
-    }
-
-    return [tokenSlug, { isLoading: false, error: new Error('No connection') }];
-  }
-
-  async getFreshEntitiesEntries<T>(
-    fetchFn: (connection: Connection, token: TokenDescriptor) => Promise<T>,
-    tokens = this.tokens
-  ): Promise<Array<[string, FetchState<T>]>> {
-    return Promise.all(tokens.map(token => this.getFreshEntityEntry(fetchFn, token)));
-  }
-
-  makeTokensLoadingState<T>(
-    prevState: Record<string, FetchState<T>>,
-    tokens = this.tokens
-  ): Record<string, FetchState<T>> {
-    return Object.fromEntries(
-      this.tokens.map(token => {
-        const tokenSlug = getTokenSlug(token);
-
-        return [
-          tokenSlug,
-          tokens.includes(token) ? prevState[tokenSlug] : { isLoading: true, data: prevState[tokenSlug]?.data }
-        ];
-      })
-    );
-  }
-
   async updateAllBalances() {
     this.patchBalances(this.makeTokensLoadingState(this.balances));
 
@@ -139,6 +94,51 @@ class TokensStore {
 
   resetMetadata() {
     this.metadata = Object.fromEntries(this.tokens.map(token => [getTokenSlug(token), { isLoading: true }]));
+  }
+
+  private async getFreshEntityEntry<T>(
+    fetchFn: (connection: Connection, token: TokenDescriptor) => Promise<T>,
+    token: TokenDescriptor
+  ): Promise<[string, FetchState<T>]> {
+    const tokenSlug = getTokenSlug(token);
+    const connection = connectionStore.connection;
+
+    if (connection) {
+      try {
+        const data = await fetchFn(connection, token);
+
+        return [tokenSlug, { isLoading: false, data }];
+      } catch (e) {
+        console.error(e);
+
+        return [tokenSlug, { isLoading: false, error: e instanceof Error ? e : new Error('Unknown error') }];
+      }
+    }
+
+    return [tokenSlug, { isLoading: false, error: new Error('No connection') }];
+  }
+
+  private async getFreshEntitiesEntries<T>(
+    fetchFn: (connection: Connection, token: TokenDescriptor) => Promise<T>,
+    tokens = this.tokens
+  ): Promise<Array<[string, FetchState<T>]>> {
+    return Promise.all(tokens.map(token => this.getFreshEntityEntry(fetchFn, token)));
+  }
+
+  private makeTokensLoadingState<T>(
+    prevState: Record<string, FetchState<T>>,
+    tokens = this.tokens
+  ): Record<string, FetchState<T>> {
+    return Object.fromEntries(
+      this.tokens.map(token => {
+        const tokenSlug = getTokenSlug(token);
+
+        return [
+          tokenSlug,
+          tokens.includes(token) ? prevState[tokenSlug] : { isLoading: true, data: prevState[tokenSlug]?.data }
+        ];
+      })
+    );
   }
 }
 

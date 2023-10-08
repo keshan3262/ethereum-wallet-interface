@@ -20,6 +20,9 @@ export const getEthereum = () => window.ethereum ? window.ethereum as MaybeMetam
 export const ethereumIsAvailable = () => Boolean(getEthereum());
 export const metamaskIsAvailable = () => getEthereum()?.isMetaMask ?? false;
 
+/**
+ * Requests adding network by the specified id. If the specified network is unknown, an error is thrown.
+ */
 const addNetwork = async (networkId: number) => {
   const ethereum = getEthereum();
 
@@ -47,9 +50,7 @@ const addNetwork = async (networkId: number) => {
   }
 };
 
-/**
- * Switches RPC node in Metamask and reloads the window if there is no pending switch; otherwise, does nothing.
- */
+/** Switches network in Metamask and reloads the window */
 export const switchChain = async (networkId: number): Promise<void> => {
   const ethereum = getEthereum();
 

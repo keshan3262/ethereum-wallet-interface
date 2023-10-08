@@ -21,6 +21,7 @@ const MATIC = {
   decimals: 18,
 };
 
+/** A record of known networks */
 export const networks: Record<number, Network> = {
   1: {
     chainId: 1,
