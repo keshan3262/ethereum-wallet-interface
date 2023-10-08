@@ -1,4 +1,5 @@
 import { action, makeObservable, observable } from 'mobx';
+
 import { ethereumIsAvailable, getConnection, metamaskIsAvailable } from '../utils/connection';
 import { EthereumNotFoundError } from '../utils/error';
 import { Connection } from '../types/connection';
@@ -33,9 +34,9 @@ class ConnectionStore {
     }
 
     const connection = await getConnection(networkId);
-    this.setConnection(connection);
-
-    return connection;
+    if (connection) {
+      this.setConnection(connection);
+    }
   }
 
   async refreshAccount() {

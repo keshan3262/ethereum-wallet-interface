@@ -1,15 +1,21 @@
 export const UNKNOWN_CHAIN_ERROR_CODE = 4902;
 export const USER_REJECTED_ERROR_CODE = 4001;
+export const PENDING_REQUEST_ERROR_CODE = -32002;
 
-interface ErrorWithCode extends Error {
+interface ErrorWithCode {
   code: number;
+  message: string;
 }
 
-export class UnknownChainErrorCode extends Error {
-  code = UNKNOWN_CHAIN_ERROR_CODE;
-
-  constructor(message = 'Unknown chain') {
+export class TrueErrorWithCode extends Error implements ErrorWithCode {
+  constructor(public code: number, message: string) {
     super(message);
+  }
+}
+
+export class UnknownChainErrorCode extends TrueErrorWithCode {
+  constructor(message = 'Unknown chain') {
+    super(UNKNOWN_CHAIN_ERROR_CODE, message);
   }
 }
 
@@ -19,15 +25,13 @@ export class EthereumNotFoundError extends Error {
   }
 }
 
-export class UserRejectedError extends Error {
-  code = USER_REJECTED_ERROR_CODE;
-
+export class UserRejectedError extends TrueErrorWithCode {
   constructor(message = 'The action was rejected by the user') {
-    super(message);
+    super(USER_REJECTED_ERROR_CODE, message);
   }
 }
 
-export const isErrorWithCode = (error: unknown): error is ErrorWithCode => error instanceof Error && 'code' in error;
+export const isErrorWithCode = (error: unknown): error is ErrorWithCode => (error as any).code !== undefined;
 
 export const transformError = (error: unknown) => {
   if (isErrorWithCode(error)) {
@@ -36,6 +40,8 @@ export const transformError = (error: unknown) => {
         return new UnknownChainErrorCode();
       case USER_REJECTED_ERROR_CODE:
         return new UserRejectedError();
+      default:
+        return new TrueErrorWithCode(error.code, error.message);
     }
   }
 

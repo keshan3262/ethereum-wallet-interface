@@ -3,51 +3,47 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { connectionStore } from '../store/connection';
 import { getEthereum, metamaskIsAvailable, switchChain } from '../utils/connection';
-import { EthereumNotFoundError, getErrorMessage } from '../utils/error';
+import { EthereumNotFoundError, UnknownChainErrorCode } from '../utils/error';
 import { networks } from '../utils/networks';
+import { tokensStore } from '../store/tokens';
+import { TokenType } from '../types/tokens';
+import { withErrorDisplay } from '../utils/with-error-display';
 
 export const ConnectionForm = observer(() => {
   const connection = connectionStore.connection;
   const [selectedNetworkId, setSelectedNetworkId] = useState(1);
   const [canConnect, setCanConnect] = useState(metamaskIsAvailable());
 
-  const withErrorDisplay = useCallback(async (
-    fn: () => Promise<void>,
-    shouldShowError: (e: unknown) => boolean = () => true) => {
-    try {
-      await fn();
-    } catch (e) {
-      if (shouldShowError(e)) {
-        console.error(e);
-        alert(getErrorMessage(e));
-      }
+  const onNetworkChange = useCallback((networkId?: number) => {
+    if (networkId === undefined) {
+      tokensStore.setTokens([]);
+    } else {
+      setSelectedNetworkId(networkId);
+      const network = networks[networkId];
+      tokensStore.setTokens([{ type: TokenType.Native }, ...network.knownTokens]);
     }
-  }, []);
-
-  const onNetworkChange = useCallback((networkId: number) => {
-    setSelectedNetworkId(networkId);
   }, []);
 
   const handleSelectedNetworkChange = useCallback(async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newNetworkId = Number(e.target.value);
-    setSelectedNetworkId(newNetworkId);
 
     if (connection) {
-      await withErrorDisplay(async () => {
-        await switchChain(newNetworkId);
-        onNetworkChange(newNetworkId);
-      });
+      await withErrorDisplay(async () => switchChain(newNetworkId), e => !(e instanceof UnknownChainErrorCode));
+    } else {
+      setSelectedNetworkId(newNetworkId);
     }
-  }, [connection, onNetworkChange, withErrorDisplay]);
+  }, [connection]);
 
   const handleConnectClick = useCallback(async () => withErrorDisplay(async () => {
     if (connection) {
       await connectionStore.disconnect();
+      onNetworkChange(undefined);
     } else {
-      const { networkId } = await connectionStore.connect(selectedNetworkId);
-      onNetworkChange(networkId);
+      await connectionStore.connect(selectedNetworkId);
+      const newConnection = connectionStore.connection;
+      onNetworkChange(newConnection?.networkId);
     }
-  }), [connection, onNetworkChange, selectedNetworkId, withErrorDisplay]);
+  }), [connection, onNetworkChange, selectedNetworkId]);
 
   useEffect(() => {
     const ethereum = getEthereum();
@@ -56,36 +52,64 @@ export const ConnectionForm = observer(() => {
       return;
     }
 
-    const handleAccountsChanged = async () => withErrorDisplay(async () => {
-      connectionStore.refreshAccount();
-    });
+    const handleAccountsChanged = async () => withErrorDisplay(async () => connectionStore.refreshAccount());
 
-    const handleChainChanged = () => window.location.reload();
+    if (ethereum.on && ethereum.off) {
+      const handleChainChanged = () => window.location.reload();
 
-    ethereum.on('accountsChanged', handleAccountsChanged);
-    ethereum.on('chainChanged', handleChainChanged);
+      ethereum.on('accountsChanged', handleAccountsChanged);
+      ethereum.on('chainChanged', handleChainChanged);
 
-    return () => {
-      ethereum.off('accountsChanged', handleAccountsChanged);
-      ethereum.off('chainChanged', handleChainChanged);
-    };
-  }, [connection, withErrorDisplay]);
+      return () => {
+        ethereum.off?.('accountsChanged', handleAccountsChanged);
+        ethereum.off?.('chainChanged', handleChainChanged);
+      };
+    }
+
+    const checkAccountInterval = setInterval(async () => {
+      try {
+        const actualSigner = await connection.provider.getSigner();
+        const actualAddress = await actualSigner.getAddress();
+        const actualNetwork = await connection.provider.getNetwork();
+        if (actualAddress !== connection.address) {
+          await handleAccountsChanged();
+        }
+        if (actualNetwork.chainId !== BigInt(connection.networkId)) {
+          window.location.reload();
+        }
+      } catch (e) {
+        // Network is changed inside Metamask
+        if (e instanceof Error && 'event' in e && 'code' in e && e.event === 'changed' && e.code === 'NETWORK_ERROR') {
+          window.location.reload();
+        } else {
+          console.error(e);
+        }
+      }
+    }, 100);
+
+    return () => clearInterval(checkAccountInterval);
+  }, [connection]);
 
   useEffect(() => {
-    withErrorDisplay(async () => {
-      const { networkId } = await connectionStore.connect();
-      onNetworkChange(networkId);
-    }, e => !(e instanceof EthereumNotFoundError));
-    
-    const timeout = setTimeout(() => setCanConnect(metamaskIsAvailable()), 1000);
+    if (canConnect) {
+      withErrorDisplay(async () => {
+        await connectionStore.connect();
+        const newConnection = connectionStore.connection;
+        onNetworkChange(newConnection?.networkId);
+      }, e => !(e instanceof EthereumNotFoundError));
+    }
+  }, [onNetworkChange, canConnect]);
 
-    return () => clearTimeout(timeout);
-  }, [onNetworkChange, withErrorDisplay]);
+  useEffect(() => {
+    const interval = setInterval(() => setCanConnect(metamaskIsAvailable()), 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="row">
       <select value={selectedNetworkId} onChange={handleSelectedNetworkChange}>
-        {Object.values(networks).map(({ id, fullName }) => (
+        {Object.values(networks).map(({ chainId: id, chainName: fullName }) => (
           <option key={id} value={id}>{fullName}</option>
         ))}
       </select>

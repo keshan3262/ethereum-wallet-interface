@@ -1,13 +1,12 @@
 import { TokenDescriptor, TokenMetadata, TokenType } from '../types/tokens';
 
 interface Network {
-  id: number;
+  chainId: number;
   nativeCurrency: TokenMetadata;
-  type: string;
-  fullName: string;
-  shortName: string;
-  explorerUrl: string;
+  chainName: string;
+  blockExplorerUrls: string[];
   knownTokens: TokenDescriptor[];
+  rpcUrls: string[];
 }
 
 const ETH = {
@@ -24,12 +23,10 @@ const MATIC = {
 
 export const networks: Record<number, Network> = {
   1: {
-    id: 1,
+    chainId: 1,
     nativeCurrency: ETH,
-    type: 'main',
-    fullName: 'Ethereum Mainnet',
-    shortName: 'Ethereum',
-    explorerUrl: `https://etherscan.io`,
+    chainName: 'Ethereum Mainnet',
+    blockExplorerUrls: ['https://etherscan.io'],
     knownTokens: [
       {
         type: TokenType.ERC20,
@@ -43,15 +40,14 @@ export const networks: Record<number, Network> = {
         type: TokenType.ERC20,
         address: '0xd533a949740bb3306d119cc777fa900ba034cd52'
       }
-    ]
+    ],
+    rpcUrls: ['https://mainnet.infura.io/v3']
   },
   42161: {
-    id: 42161,
+    chainId: 42161,
     nativeCurrency: ETH,
-    type: 'arbitrum',
-    fullName: 'Arbitrum Mainnet',
-    shortName: 'Arbitrum',
-    explorerUrl: 'https://arbiscan.io/',
+    chainName: 'Arbitrum Mainnet',
+    blockExplorerUrls: ['https://arbiscan.io/'],
     knownTokens: [
       {
         type: TokenType.ERC20,
@@ -63,17 +59,16 @@ export const networks: Record<number, Network> = {
       },
       {
         type: TokenType.ERC20,
-        address: '0x172370d5cd63279efa6d502dab29171933a610af'
+        address: '0x11cdb42b0eb46d95f990bedd4695a6e3fa034978'
       }
-    ]
+    ],
+    rpcUrls: ['https://1rpc.io/arb']
   },
   137: {
-    id: 137,
+    chainId: 137,
     nativeCurrency: MATIC,
-    type: 'matic',
-    fullName: 'Polygon Mainnet',
-    shortName: 'Polygon',
-    explorerUrl: `https://polygonscan.com`,
+    chainName: 'Polygon Mainnet',
+    blockExplorerUrls: ['https://polygonscan.com'],
     knownTokens: [
       {
         type: TokenType.ERC20,
@@ -87,6 +82,7 @@ export const networks: Record<number, Network> = {
         type: TokenType.ERC20,
         address: '0x172370d5cd63279efa6d502dab29171933a610af'
       },
-    ]
+    ],
+    rpcUrls: ['https://1rpc.io/matic']
   }
 };
