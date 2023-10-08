@@ -17,7 +17,9 @@ interface ERC20TokenDescriptor extends TokenDescriptorBase {
   address: string;
 }
 
-export type TokenDescriptor = ERC20TokenDescriptor | NativeTokenDescriptor;
+export type ContractTokenDescriptor = ERC20TokenDescriptor;
+
+export type TokenDescriptor = ContractTokenDescriptor | NativeTokenDescriptor;
 
 export interface TokenMetadata {
   name: string;
