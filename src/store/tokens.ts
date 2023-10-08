@@ -84,7 +84,6 @@ class TokensStore {
 
     const newBalancesEntries = await this.getFreshEntitiesEntries(fetchBalanceFn);
     this.patchBalances(Object.fromEntries(newBalancesEntries));
-    this.balancesAreOutdated = Object.fromEntries(newBalancesEntries.map(([tokenSlug]) => [tokenSlug, false]));
   }
 
   async updateOutdatedBalances() {
@@ -96,7 +95,6 @@ class TokensStore {
 
     const newBalancesEntries = await this.getFreshEntitiesEntries(fetchBalanceFn, outdatedBalancesTokens);
     this.patchBalances(Object.fromEntries(newBalancesEntries));
-    this.balancesAreOutdated = Object.fromEntries(newBalancesEntries.map(([tokenSlug]) => [tokenSlug, false]));
   }
 
   async updateBalance(token: TokenDescriptor) {
@@ -121,10 +119,18 @@ class TokensStore {
 
   patchBalances(balances: Record<string, FetchState<bigint>>) {
     this.balances = { ...this.balances, ...balances };
+    this.balancesAreOutdated = Object.fromEntries(
+      Object.keys(balances).map(tokenSlug => {
+        const balanceFetchState = balances[tokenSlug];
+
+        return [tokenSlug, !!balanceFetchState.error];
+      })
+    );
   }
 
   resetBalances() {
     this.balances = Object.fromEntries(this.tokens.map(token => [getTokenSlug(token), { isLoading: true }]));
+    this.balancesAreOutdated = Object.fromEntries(this.tokens.map(token => [getTokenSlug(token), false]));
   }
 
   patchMetadata(metadata: Record<string, FetchState<TokenMetadata>>) {

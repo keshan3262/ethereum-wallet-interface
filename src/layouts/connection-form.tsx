@@ -115,7 +115,7 @@ export const ConnectionForm = observer(() => {
       </select>
       <button disabled={!canConnect} type="button" onClick={handleConnectClick}>
         {!canConnect && 'Metamask is not available'}
-        {canConnect && connection && 'Disconnect'}
+        {canConnect && connection && `${connection.address.slice(0, 6)}...${connection.address.slice(-4)}`}
         {canConnect && !connection && 'Connect'}
       </button>
     </div>

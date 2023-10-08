@@ -20,7 +20,6 @@ class ConnectionStore {
     }
 
     this.connection.provider.removeAllListeners();
-    this.connection.provider.destroy();
     this.setConnection(undefined);
   }
 
